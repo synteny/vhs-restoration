@@ -21,12 +21,12 @@ NOISE_CLIP = os.path.abspath(os.path.join('avs', 'noise.mp4'))
 IMAGE_DIRNAME = 'images'
 REFEREMCE_IMAGE_DIRNAME = 'ref_images'
 N_FRAMES = 7
-TILE_HEIGHT = 40
-TILE_WIDTH = 40
+TILE_HEIGHT = 20
+TILE_WIDTH = 20
 VIDEO_RANGE = (0,100000)
 MAX_SAMPLES = 1000000
 URL_BASE = 'https://www.youtube.com/watch?v='
-OUTDIR = "C:\\hack\\outdir"
+OUTDIR = "D:\\dataset"
 
 
 ydl_opts = {'outtmpl': 'download.mp4', 'format': '135'}
@@ -43,12 +43,19 @@ def main():
 
     itervideos = iter(videos)
     while(seqNo < MAX_SAMPLES):
-        v = next(itervideos)
-        url = URL_BASE + v.strip()
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            if ('135' in get_formats(url)):
-                ydl.download([url])
-                seqNo += process(os.path.abspath('download.mp4'), OUTDIR, seqNo)
+        try:
+            v = next(itervideos)
+            url = URL_BASE + v.strip()
+            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                if ('135' in get_formats(url)):
+                    ydl.download([url])
+                    seqNo += process(os.path.abspath('download.mp4'), OUTDIR, seqNo)
+                    print("-"*80)
+                    print("%d samples generated" % seqNo)
+                    print("-"*80)
+                    os.remove('download.mp4')
+        except:
+            print("Processing video %s failed" % v)
 
 
 def prepare_dir(dir, input_clip):
@@ -108,11 +115,11 @@ def grouper(iterable, n, fillvalue=None):
     return zip_longest(*args, fillvalue=fillvalue)
 
 
-def split_images(indir, outdir, seqNo, onlyLast=False):
+def split_images(indir, outdir, seqNo, mask=set(range(1, N_FRAMES + 1))):
     processed = 0
     for filename_batch in grouper(sorted(os.listdir(indir)), N_FRAMES):
         for batchNo, filename in enumerate(filename_batch, 1):
-            if ((not onlyLast) and batchNo < N_FRAMES) or batchNo == N_FRAMES:
+            if batchNo in mask:
                 tiles = split_image(os.path.join(indir, filename), TILE_HEIGHT, TILE_WIDTH, seqNo + processed, batchNo, outdir)
         processed += tiles
     return processed
@@ -134,7 +141,7 @@ def process(filename, outdir, seqNo = 1):
     generate_images(dir)
 
     processed = split_images(os.path.join(dir, 'images'), vhs_output, seqNo)
-    split_images(os.path.join(dir, 'ref_images'), ref_output, seqNo, onlyLast=True)
+    split_images(os.path.join(dir, 'ref_images'), ref_output, seqNo, mask={4})
 
     shutil.rmtree(dir)
 
