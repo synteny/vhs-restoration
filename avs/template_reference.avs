@@ -1,1 +1,1 @@
-FFVideoSource("%INPUT%").bilinearresize(400,480).SelectRangeEvery(125, %N%)
+FFVideoSource("%INPUT%").bilinearresize(200,240).SelectRangeEvery(125, %N%)

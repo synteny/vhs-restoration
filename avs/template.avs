@@ -40,4 +40,4 @@ color=mergechroma(coloru,colorv,0.5).coloryuv(gain_y=-256, cont_u=128, cont_v=12
 noise=ffvideosource("%NOISE%")
 noise = noise.trim(rand(noise.FrameCount()),0).bilinearresize(400,480).loop(-1)
 finalsignal=overlay(grey, color, mode="add", opacity=1)
-overlay(finalsignal, noise, mode="add", opacity=1).LEVELS(40,1,255,0,255).SelectRangeEvery(125, %N%)
+overlay(finalsignal, noise, mode="add", opacity=1).LEVELS(40,1,255,0,255).SelectRangeEvery(125, %N%).BilinearResize(200,240)
